@@ -1,50 +1,43 @@
-import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
+public class FTP extends BaseSocket {
 
-public class FTP {
+    public static final int DEFAULT_PORT =  21;
 
-    private static final int _defaultPort =  21;
+    public static final int DEFAULT_DATA_PORT =  20;
 
-    private int port;
+    public static final String NETASCII_EOL = "\r\n";
 
-    private String host;
-
-    protected Socket socket;
-
-    protected BufferedReader socketBufferedReader;
-
-    protected BufferedWriter socketBufferedWriter;
-
-    public void connection(int port, String host){
-        this.port = port;
-        this.host =  host;
-    }
-
-    InetAddress getActiveHost() {
+    private void _send(String command){
         try{
-            return host != null && !host.isEmpty() ? InetAddress.getByName(host) : getDefaultHost();
-        }catch (UnknownHostException ex){
-            return null;
+            _baseSocketWriter.write(command);
+            _baseSocketWriter.flush();
+        }catch (Exception ex){
+            ex.printStackTrace();
         }
-
     }
 
-    int getActivePort() {
-        return port != 0 ? port :  _defaultPort;
+    private String _buildCommandMessage(String command, String arg){
+        StringBuilder commandBuilder= new StringBuilder();
+        commandBuilder.append(command);
+        if(arg != null){
+            commandBuilder.append(' ');
+            commandBuilder.append(arg);
+        }
+        commandBuilder.append(NETASCII_EOL);
+        return  commandBuilder.toString();
     }
 
-
-    /**
-     *
-     * @return null at first tine, in future was added default sources for download
-     */
-    private InetAddress getDefaultHost() {
-        return null;
+    public void pass(String pass){
+        String command = _buildCommandMessage("PASS", pass);
+        _send(command);
     }
 
+    public void user(String userName){
+        String command = _buildCommandMessage("USER", userName);
+        _send(command);
+    }
 
+    public void retr(String fileName){
+        String command = _buildCommandMessage("RETR", fileName);
+        _send(command);
+    }
 }
