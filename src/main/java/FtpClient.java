@@ -7,10 +7,17 @@ import java.net.Socket;
 
 public class FtpClient extends FTP {
 
+    public void login(String user, String pass){
+        if(user != null && pass != null){
+            user(user);
+            pass(pass);
+        }
+    }
+
     public void retrieveFileStream(String fileName){
         if(fileName != null){
-
-            Socket socket =  _openDataConnection();
+            System.out.println("start read file");
+            Socket socket =  _openDataConnection("RETR", fileName);
             byte[] byteArray =  new byte[1024];
             FileOutputStream fileOutputStream;
             BufferedOutputStream bufferedOutputStream;
@@ -31,17 +38,16 @@ public class FtpClient extends FTP {
         }
      }
 
-    private Socket _openDataConnection() {
+    private Socket _openDataConnection(String command, String ard) {
         Socket socket = null;
         try {
               ServerSocket serverSocket = _serverSocketFactory.createServerSocket(0);
+              port(getLocalAdress(), serverSocket.getLocalPort());
+              sendMessage(command, ard);
               socket = serverSocket.accept();
         } catch (IOException e) {
             e.printStackTrace();
         }
         return socket;
     }
-
-
-
 }
