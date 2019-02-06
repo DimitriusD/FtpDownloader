@@ -1,9 +1,7 @@
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Path;
 
 public class FtpClient extends FTP {
 
@@ -14,7 +12,7 @@ public class FtpClient extends FTP {
         }
     }
 
-    public void retrieveFileStream(String fileName){
+    public void retrieveFileStream(String fileName,  Path path ){
         if(fileName != null){
             System.out.println("start read file");
             Socket socket =  _openDataConnection("RETR", fileName);
@@ -24,13 +22,17 @@ public class FtpClient extends FTP {
             if(socket != null){
                 try{
                     InputStream inputStream =  socket.getInputStream();
-                    fileOutputStream =  new FileOutputStream(fileName);
-                    bufferedOutputStream =  new BufferedOutputStream(fileOutputStream);
-                    int bytesRead = 0;
-                    while((bytesRead = inputStream.read(byteArray)) != -1){
-                        bufferedOutputStream.write(byteArray, 0, bytesRead);
-                        System.out.println(new String(byteArray, 0, bytesRead));
+                    File file = path.toFile();
+                    if(file.getParentFile().mkdirs() && file.createNewFile()){
+                        fileOutputStream =  new FileOutputStream(file);
+                        bufferedOutputStream =  new BufferedOutputStream(fileOutputStream);
+                        int bytesRead = 0;
+                        while((bytesRead = inputStream.read(byteArray)) != -1){
+                            bufferedOutputStream.write(byteArray, 0, bytesRead);
+                            System.out.println(new String(byteArray, 0, bytesRead));
+                        }
                     }
+
                 }catch (Exception ex){
                     ex.printStackTrace();
                 }
